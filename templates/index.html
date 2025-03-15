@@ -1,75 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Invoice Simulation Game</title>
+  <meta charset="UTF-8">
+  <title>Invoice Simulation Game - Outlook Style</title>
+  <style>
+    /* --- BASIC RESET --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      color: #444;
+    }
+
+    /* --- TOP NAV BAR --- */
+    .top-nav {
+      background-color: #f3f3f3;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      height: 48px;
+    }
+    .top-nav .logo {
+      font-weight: bold;
+      color: #0078d4; /* Outlook-like blue */
+      margin-right: 20px;
+    }
+    .top-nav .nav-items {
+      display: flex;
+      gap: 15px;
+      flex: 1;
+    }
+    .top-nav .nav-items span {
+      cursor: pointer;
+    }
+    .top-nav .user-section {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-nav .user-section img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+
+    /* --- MAIN CONTAINER: SIDEBAR + MESSAGE LIST + READING PANE --- */
+    .main-container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: 200px;
+      background-color: #f3f3f3;
+      border-right: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #666;
+      text-transform: uppercase;
+    }
+    .sidebar ul {
+      list-style: none;
+    }
+    .sidebar ul li {
+      padding: 6px 0;
+      cursor: pointer;
+    }
+    .sidebar ul li:hover {
+      background-color: #ddd;
+    }
+
+    /* --- MESSAGE LIST --- */
+    .message-list {
+      width: 320px;
+      border-right: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+    }
+    .message-list-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      background-color: #fafafa;
+    }
+    .message-list-header .tab-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      font-weight: bold;
+      color: #0078d4;
+    }
+    .message-list-header .tab-button.active {
+      border-bottom: 2px solid #0078d4;
+    }
+    .message-list-content {
+      overflow-y: auto;
+      flex: 1;
+    }
+    /* Each “email” in the list */
+    .message-item {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .message-item:hover {
+      background-color: #f2f6fc;
+    }
+    .message-sender {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .message-subject {
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: #333;
+    }
+    .message-preview {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* --- READING PANE --- */
+    .reading-pane {
+      flex: 1;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .reading-pane-header {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+    .reading-pane-header h2 {
+      font-size: 16px;
+      margin-bottom: 5px;
+      color: #0078d4;
+    }
+    .reading-pane-header .sender-info {
+      font-size: 13px;
+      color: #666;
+    }
+    .reading-pane-body {
+      flex: 1;
+      white-space: pre-wrap; /* so line breaks appear */
+    }
+    .reading-pane-actions {
+      margin-top: 15px;
+    }
+    .reading-pane-actions button {
+      margin-right: 8px;
+      padding: 6px 12px;
+      background-color: #0078d4;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .reading-pane-actions button:hover {
+      background-color: #005a9e;
+    }
+    .rating-container {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .rating-container label {
+      margin-right: 5px;
+    }
+    .rating-container input {
+      width: 50px;
+    }
+
+    /* Just a quick scroll style */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+    }
+  </style>
 </head>
 <body>
-    <h1>Invoice Simulation</h1>
-    <ul id="invoice-list">
-        {% for inv in invoices %}
-            <li>
-                Invoice {{ inv.round }}: {{ inv.name }} 
-                <button onclick="selectInvoice({{ inv.round }})">Open</button>
-            </li>
-        {% endfor %}
-    </ul>
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <div class="logo">My Outlook Clone</div>
+    <div class="nav-items">
+      <span>New Message</span>
+      <span>Calendar</span>
+      <span>Contacts</span>
+    </div>
+    <div class="user-section">
+      <span>John Doe</span>
+      <img src="https://via.placeholder.com/28" alt="User">
+    </div>
+  </div>
 
-    <div id="invoice-details" style="display:none; margin-top:20px;">
-        <h2 id="invoice-title"></h2>
-        <pre id="invoice-message"></pre>
-        <div>
-            <button onclick="recordResponse('Pay Immediately')">Pay Immediately</button>
-            <button onclick="recordResponse('Delay Payment')">Delay Payment</button>
-            <button onclick="recordResponse('Ignore Invoice')">Ignore Invoice</button>
-        </div>
-        <div style="margin-top:10px;">
-            <label for="rating">Relationship Rating (1-5): </label>
-            <input type="number" id="rating" min="1" max="5" value="3">
-        </div>
+  <!-- Main Container: Sidebar + Message List + Reading Pane -->
+  <div class="main-container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <h2>Favorites</h2>
+      <ul>
+        <li>Inbox</li>
+        <li>Sent Items</li>
+        <li>Drafts</li>
+      </ul>
+      <h2>Folders</h2>
+      <ul>
+        <li>Archive</li>
+        <li>Deleted Items</li>
+        <li>Spam</li>
+      </ul>
     </div>
 
-    <script>
-        let currentInvoiceRound = null;
+    <!-- Message List (replaces your invoice list) -->
+    <div class="message-list">
+      <div class="message-list-header">
+        <button class="tab-button active">Focused</button>
+        <button class="tab-button">Other</button>
+      </div>
+      <div class="message-list-content" id="invoice-list">
+        <!-- Jinja loop: each invoice is displayed as if it's an email item -->
+        {% for inv in invoices %}
+          <div class="message-item" onclick="selectInvoice({{ inv.round }})">
+            <div class="message-sender">Invoice Bot</div>
+            <div class="message-subject">Invoice {{ inv.round }}: {{ inv.name }}</div>
+            <div class="message-preview">
+              (Click to open details)
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
 
-        function selectInvoice(round) {
-            currentInvoiceRound = round;
-            fetch('/select_invoice', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ round: round })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.error) {
-                    alert(data.error);
-                    return;
-                }
-                document.getElementById('invoice-details').style.display = 'block';
-                document.getElementById('invoice-title').innerText = "Invoice " + data.round + ": " + data.name;
-                document.getElementById('invoice-message').innerText = 
-                    "Principle: " + data.principle + "\nMessage: " + data.message;
-            });
-        }
+    <!-- Reading Pane -->
+    <div class="reading-pane" id="invoice-details" style="display: none;">
+      <div class="reading-pane-header">
+        <h2 id="invoice-title">Subject</h2>
+        <div class="sender-info">From: Invoice Bot</div>
+      </div>
+      <div class="reading-pane-body">
+        <div id="invoice-message"></div>
+      </div>
+      <div class="reading-pane-actions">
+        <button onclick="recordResponse('Pay Immediately')">Pay Immediately</button>
+        <button onclick="recordResponse('Delay Payment')">Delay Payment</button>
+        <button onclick="recordResponse('Ignore Invoice')">Ignore Invoice</button>
+      </div>
+      <div class="rating-container">
+        <label for="rating">Relationship Rating (1-5):</label>
+        <input type="number" id="rating" min="1" max="5" value="3">
+      </div>
+    </div>
+  </div>
 
-        function recordResponse(responseText) {
-            const rating = document.getElementById('rating').value;
-            fetch('/record_response', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ round: currentInvoiceRound, response: responseText, rating: rating })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.error) {
-                    alert(data.error);
-                } else {
-                    alert(data.message + "\nResponse time: " + (data.duration ? data.duration.toFixed(2) : 'N/A') + " seconds");
-                    // Optionally, refresh the page or update the UI to remove the processed invoice
-                    location.reload();
-                }
-            });
+  <!-- Script Section: Keep your existing JS logic but rename IDs as needed -->
+  <script>
+    let currentInvoiceRound = null;
+
+    function selectInvoice(round) {
+      currentInvoiceRound = round;
+      fetch('/select_invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ round: round })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+          return;
         }
-    </script>
+        // Show reading pane
+        document.getElementById('invoice-details').style.display = 'flex';
+        // Fill in subject & message
+        document.getElementById('invoice-title').innerText = 
+          "Invoice " + data.round + ": " + data.name;
+        document.getElementById('invoice-message').innerText =
+          "Principle: " + data.principle + "\nMessage: " + data.message;
+      });
+    }
+
+    function recordResponse(responseText) {
+      const rating = document.getElementById('rating').value;
+      fetch('/record_response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ round: currentInvoiceRound, response: responseText, rating: rating })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert(
+            data.message + "\nResponse time: " +
+            (data.duration ? data.duration.toFixed(2) : 'N/A') + " seconds"
+          );
+          // Optionally refresh or update UI
+          location.reload();
+        }
+      });
+    }
+  </script>
 </body>
 </html>
