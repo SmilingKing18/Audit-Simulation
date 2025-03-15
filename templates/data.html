@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice Data Overview</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f3f3f3; }
+    button { margin-top: 15px; padding: 8px 12px; background-color: #0078d4; color: #fff; border: none; border-radius: 2px; cursor: pointer; }
+    button:hover { background-color: #005a9e; }
+  </style>
+</head>
+<body>
+  <h1>Invoice Data Overview</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Round</th>
+        <th>Name</th>
+        <th>Principle</th>
+        <th>Message</th>
+        <th>Response</th>
+        <th>Rating</th>
+        <th>Response Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inv in invoices %}
+      <tr>
+        <td>{{ inv.round }}</td>
+        <td>{{ inv.name }}</td>
+        <td>{{ inv.principle }}</td>
+        <td>{{ inv.message }}</td>
+        <td>{{ inv.response }}</td>
+        <td>{{ inv.relationship_rating }}</td>
+        <td>
+          {% if inv.response_time and inv.open_time %}
+            {{ (inv.response_time - inv.open_time)|round(2) }} sec
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button onclick="window.history.back()">Back</button>
+</body>
+</html>
