@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Simulation Game</title>
+</head>
+<body>
+    <h1>Invoice Simulation</h1>
+    <ul id="invoice-list">
+        {% for inv in invoices %}
+            <li>
+                Invoice {{ inv.round }}: {{ inv.name }} 
+                <button onclick="selectInvoice({{ inv.round }})">Open</button>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div id="invoice-details" style="display:none; margin-top:20px;">
+        <h2 id="invoice-title"></h2>
+        <pre id="invoice-message"></pre>
+        <div>
+            <button onclick="recordResponse('Pay Immediately')">Pay Immediately</button>
+            <button onclick="recordResponse('Delay Payment')">Delay Payment</button>
+            <button onclick="recordResponse('Ignore Invoice')">Ignore Invoice</button>
+        </div>
+        <div style="margin-top:10px;">
+            <label for="rating">Relationship Rating (1-5): </label>
+            <input type="number" id="rating" min="1" max="5" value="3">
+        </div>
+    </div>
+
+    <script>
+        let currentInvoiceRound = null;
+
+        function selectInvoice(round) {
+            currentInvoiceRound = round;
+            fetch('/select_invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ round: round })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.error) {
+                    alert(data.error);
+                    return;
+                }
+                document.getElementById('invoice-details').style.display = 'block';
+                document.getElementById('invoice-title').innerText = "Invoice " + data.round + ": " + data.name;
+                document.getElementById('invoice-message').innerText = 
+                    "Principle: " + data.principle + "\nMessage: " + data.message;
+            });
+        }
+
+        function recordResponse(responseText) {
+            const rating = document.getElementById('rating').value;
+            fetch('/record_response', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ round: currentInvoiceRound, response: responseText, rating: rating })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message + "\nResponse time: " + (data.duration ? data.duration.toFixed(2) : 'N/A') + " seconds");
+                    // Optionally, refresh the page or update the UI to remove the processed invoice
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
